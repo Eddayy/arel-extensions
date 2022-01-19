@@ -8,13 +8,8 @@ module ArelExtensions
       def make_json_string expr
         Arel::Nodes.build_quoted('"') \
         + expr
-            .coalesce('')
             .replace('\\','\\\\').replace('"','\"').replace("\n", '\n') \
         + '"'
-      end
-
-      def make_json_null
-        Arel::Nodes.build_quoted("null")
       end
 
       # Math Functions
@@ -606,20 +601,20 @@ module ArelExtensions
       def json_value(o,v)
         case o.type_of_node(v)
         when :string
-          Arel.when(v.is_null).then(make_json_null).else(make_json_string(v))
+          Arel.when(v.is_null).then(Arel.null).else(make_json_string(v))
         when :date
           s = v.format('%Y-%m-%d')
-          Arel.when(s.is_null).then(make_json_null).else(make_json_string(s))
+          Arel.when(s.is_null).then(Arel.null).else(make_json_string(s))
         when :datetime
           s = v.format('%Y-%m-%dT%H:%M:%S')
-          Arel.when(s.is_null).then(make_json_null).else(make_json_string(s))
+          Arel.when(s.is_null).then(Arel.null).else(make_json_string(s))
         when :time
           s = v.format('%H:%M:%S')
-          Arel.when(s.is_null).then(make_json_null).else(make_json_string(s))
+          Arel.when(s.is_null).then(Arel.null).else(make_json_string(s))
         when :nil
-          make_json_null
+          Arel.null
         else
-          ArelExtensions::Nodes::Cast.new([v, :string]).coalesce(make_json_null)
+          ArelExtensions::Nodes::Cast.new([v, :string]).coalesce(Arel.null)
         end
       end
 
@@ -641,7 +636,7 @@ module ArelExtensions
             if i != 0
               res += ', '
             end
-            res += make_json_string(ArelExtensions::Nodes::Cast.new([k, :string])) + ': '
+            res += make_json_string(ArelExtensions::Nodes::Cast.new([k, :string]).coalesce("")) + ': '
             res += json_value(o,v)
           end
           res += '}'
@@ -663,7 +658,7 @@ module ArelExtensions
             if i != 0
               res = res + ', '
             end
-            kv = make_json_string(ArelExtensions::Nodes::Cast.new([k, :string])) + ': '
+            kv = make_json_string(ArelExtensions::Nodes::Cast.new([k, :string]).coalesce("")) + ': '
             kv += json_value(o,v)
             res = res + kv.group_concat(', ', order: Array(orders)).coalesce('')
           end

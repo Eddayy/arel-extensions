@@ -780,8 +780,11 @@ module ArelExtensions
         skip "Can't be tested on postgresql" if @env_db == 'postgresql'
         # creation
         assert_equal 'Arthur', t(@arthur, Arel.json(@name))
-        assert_equal ["Arthur","Arthur"], parse_json(t(@arthur, Arel.json(@name, @name)))
-        assert_equal ["Arthur", nil],     parse_json(t(@arthur, Arel.json(@name, nil)))
+        assert_equal ["Arthur","Arthur"],   parse_json(t(@arthur, Arel.json(@name, @name)))
+        assert_equal ["Arthur", nil],       parse_json(t(@arthur, Arel.json(@name, nil)))
+        assert_equal ["comment", 'arrêté'], parse_json(t(@arthur, Arel.json("comment", @comments)))
+        assert_equal ["comment", nil],      parse_json(t(@lucas,  Arel.json("comment", @comments)))
+
         assert_equal ({"Arthur" => "Arthur", "Arthur2" => "ArthurArthur"}), parse_json(t(@arthur,Arel.json({@name => @name,@name+"2" => @name+@name})))
         assert_equal ({"Arthur" => "Arthur","Arthur2" => 1}), parse_json(t(@arthur,Arel.json({@name => @name,@name+"2" => 1})))
         assert_equal ({"Arthur" => nil}), parse_json(t(@arthur, Arel.json({@name => nil})))

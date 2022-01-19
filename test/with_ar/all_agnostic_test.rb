@@ -781,6 +781,7 @@ module ArelExtensions
         # creation
         assert_equal 'Arthur', t(@arthur,Arel.json(@name))
         assert_equal ["Arthur","Arthur"], parse_json(t(@arthur,Arel.json(@name,@name)))
+        assert_equal ["Arthur", nil], parse_json(t(@arthur, Arel.json(@name, nil)))
         assert_equal ({"Arthur" => "Arthur", "Arthur2" => "ArthurArthur"}), parse_json(t(@arthur,Arel.json({@name => @name,@name+"2" => @name+@name})))
         assert_equal ({"Arthur" => "Arthur","Arthur2" => 1}), parse_json(t(@arthur,Arel.json({@name => @name,@name+"2" => 1})))
         assert_equal ([{"age" => 21},{"name" => "Arthur","score" => 65.62}]), parse_json(t(@arthur,Arel.json([{age: @age},{name: @name,score: @score}])))
